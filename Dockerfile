@@ -99,6 +99,7 @@ RUN --mount=type=tmpfs,target=/tmp \
         gdbserver \
         gettext \
         git \
+        gnupg \
         inetutils-ping \
         inetutils-traceroute \
         iproute2 \
