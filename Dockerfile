@@ -63,6 +63,7 @@ RUN --mount=type=tmpfs,target=/tmp \
     \
     apt-get update && apt-get full-upgrade -yqq --auto-remove --purge \
     && apt-get install -yqq --no-install-recommends \
+        apt-utils \
         astyle \
         autoconf \
         automake \
@@ -76,7 +77,10 @@ RUN --mount=type=tmpfs,target=/tmp \
         busybox \
         clang-${LLVM_VERSION} \
         cmake \
+        dialog \
+        diffutils \
         file \
+        findutils \
         flex \
         htop \
         gawk \
@@ -87,7 +91,7 @@ RUN --mount=type=tmpfs,target=/tmp \
         gdbserver \
         gettext \
         git \
-        gnupg \
+        gnupg2 \
         inetutils-ping \
         inetutils-traceroute \
         iproute2 \
@@ -95,15 +99,22 @@ RUN --mount=type=tmpfs,target=/tmp \
         ipset \
         jq \
         kmod \
+        less \
         libcunit1-dev \
+        libegl1-mesa \
+        libgl1-mesa-glx \
         liblua5.4-dev \
         libluajit-5.1-dev \
+        libnss-myhostname \
         libpython3-dev \
         libssl-dev:amd64 \
         libssl-dev:arm64 \
         libssl-dev:armhf \
         libtool \
         libtool-bin \
+        libvte-2.9[0-9]-common \
+        libvte-common \
+        libvulkan1 \
         lld-${LLVM_VERSION} \
         lldb-${LLVM_VERSION} \
         llvm-${LLVM_VERSION}-dev \
@@ -115,10 +126,12 @@ RUN --mount=type=tmpfs,target=/tmp \
         man-db \
         manpages \
         mc \
+        mesa-vulkan-drivers \
         mkcert \
         nala \
         nano \
         nasm \
+        ncurses-base \
         neofetch \
         netcat-openbsd \
         ninja-build \
@@ -128,11 +141,14 @@ RUN --mount=type=tmpfs,target=/tmp \
         p7zip-rar \
         p7zip-full \
         pahole \
+        passwd \
         pbzip2 \
+        pinentry-curses \
         perl \
         pigz \
         pkg-config \
         pre-commit \
+        procps \
         pvs-studio \
         python3 \
         python3-distutils \
@@ -142,9 +158,12 @@ RUN --mount=type=tmpfs,target=/tmp \
         shellcheck \
         squashfs-tools \
         strace \
+        sudo \
         swig \
+        time \
         tree \
         tzdata \
+        util-linux \
         uuid-runtime \
         valgrind \
         wget \
@@ -159,15 +178,18 @@ RUN --mount=type=tmpfs,target=/tmp \
     && ln -s /usr/bin/distrobox-host-exec /usr/local/bin/flatpak-coredumpctl \
     \
     && ln -s /usr/bin/distrobox-host-exec /usr/local/bin/docker \
+    && ln -s /usr/bin/distrobox-host-exec /usr/local/bin/docker-init \
+    && ln -s /usr/bin/distrobox-host-exec /usr/local/bin/docker-proxy \
     && ln -s /usr/bin/distrobox-host-exec /usr/local/bin/docker-compose \
+    \
+    && setcap cap_sys_chroot+ep /usr/sbin/chroot \
     \
     && env NPM_CONFIG_CACHE=/tmp/npm npm i -g \
         npm@latest \
         yarn@latest \
         wscat \
     \
-    && apt-get autoremove --purge -yqq \
-    && setcap cap_sys_chroot+ep /usr/sbin/chroot
+    && apt-get autoremove --purge -yqq
 
 ARG MAKEFLAGS="-j4"
 ARG CFLAGS="-march=x86-64 -mtune=generic -O2 -pipe -g -DNDEBUG -pthread -fPIC -DPIC \
