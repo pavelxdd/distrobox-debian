@@ -1,0 +1,2 @@
+deb http://mirror.yandex.ru/debian sid main contrib non-free
+deb http://deb.debian.org/debian sid main contrib non-free

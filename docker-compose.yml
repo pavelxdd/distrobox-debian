@@ -1,0 +1,22 @@
+version: "3.9"
+services:
+  distrobox-debian:
+    build:
+      context: .
+      args:
+        - MAKEFLAGS=${MAKEFLAGS:--j4}
+    image: docker.io/pavelxdd/distrobox-debian:sid
+    container_name: distrobox-debian
+    network_mode: host
+    userns_mode: host
+    volumes:
+      - ${WORKSPACE:-.}:/app
+    working_dir: /app
+    tmpfs:
+      - /tmp
+      - /root
+    environment:
+      - USER=root
+      - HOME=/root
+      - WORKSPACE=${WORKSPACE:-.}
+      - MAKEFLAGS=${MAKEFLAGS:--j4}
