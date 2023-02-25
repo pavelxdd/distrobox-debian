@@ -46,12 +46,6 @@ RUN --mount=type=bind,target=/app \
     && printf "Package: *\nPin: origin %s\nPin-Priority: %s\n" \
               "deb.nodesource.com" "900" > /etc/apt/preferences.d/nodesource \
     \
-    && curl -fsSL https://download.docker.com/linux/debian/gpg \
-        | gpg --no-tty --dearmor -o /etc/apt/trusted.gpg.d/docker.gpg \
-    && printf "deb [arch=amd64] %s %s\n" \
-              "https://download.docker.com/linux/debian" \
-              "bookworm stable" > /etc/apt/sources.list.d/docker.list \
-    \
     && curl -fsSL https://files.pvs-studio.com/etc/pubkey.txt \
         | gpg --no-tty --dearmor -o /etc/apt/trusted.gpg.d/viva64.gpg \
     && printf "deb [arch=amd64] %s %s\n" \
@@ -82,9 +76,6 @@ RUN --mount=type=tmpfs,target=/tmp \
         busybox \
         clang-${LLVM_VERSION} \
         cmake \
-        docker-ce-cli \
-        docker-buildx-plugin \
-        docker-compose-plugin \
         file \
         flex \
         htop \
@@ -165,6 +156,9 @@ RUN --mount=type=tmpfs,target=/tmp \
     \
     && update-alternatives-gcc ${GCC_VERSION} 60 2> /dev/null \
     && update-alternatives-clang ${LLVM_VERSION} 60 2> /dev/null \
+    \
+    && ln -s /usr/bin/distrobox-host-exec /usr/local/bin/docker \
+    && ln -s /usr/bin/distrobox-host-exec /usr/local/bin/docker-compose \
     \
     && env NPM_CONFIG_CACHE=/tmp/npm npm i -g \
         npm@latest \
