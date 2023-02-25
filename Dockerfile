@@ -157,6 +157,10 @@ RUN --mount=type=tmpfs,target=/tmp \
     && update-alternatives-gcc ${GCC_VERSION} 60 2> /dev/null \
     && update-alternatives-clang ${LLVM_VERSION} 60 2> /dev/null \
     \
+    && ln -s /usr/bin/distrobox-host-exec /usr/local/bin/flatpak \
+    && ln -s /usr/bin/distrobox-host-exec /usr/local/bin/flatpak-bisect \
+    && ln -s /usr/bin/distrobox-host-exec /usr/local/bin/flatpak-coredumpctl \
+    \
     && ln -s /usr/bin/distrobox-host-exec /usr/local/bin/docker \
     && ln -s /usr/bin/distrobox-host-exec /usr/local/bin/docker-compose \
     \
@@ -199,6 +203,11 @@ RUN --mount=type=tmpfs,target=/tmp name=starship-x86_64-unknown-linux-gnu \
 ADD --chmod=755 --chown=root:root \
     https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64 \
     /usr/local/bin/hadolint
+
+# host-spawn
+ADD --chmod=755 --chown=root:root \
+    https://github.com/1player/host-spawn/releases/latest/download/host-spawn-x86_64 \
+    /usr/local/bin/host-spawn
 
 # lua-argparse
 ADD --chmod=644 --chown=root:root \
