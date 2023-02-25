@@ -130,6 +130,7 @@ RUN --mount=type=tmpfs,target=/tmp \
         nala \
         nano \
         nasm \
+        neofetch \
         netcat-openbsd \
         ninja-build \
         nodejs \
