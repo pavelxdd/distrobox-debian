@@ -259,3 +259,9 @@ RUN --mount=type=tmpfs,target=/tmp \
 RUN --mount=type=tmpfs,target=/tmp version=0.15.1 name=git-delta_${version}_amd64 \
     && curl -fsSLO https://github.com/dandavison/delta/releases/download/${version}/${name}.deb \
     && dpkg -i ${name}.deb
+
+# locales
+ENV LANG en_US.UTF-8
+RUN sed -i -e "s/# ${LANG} UTF-8/${LANG} UTF-8/" /etc/locale.gen \
+    && dpkg-reconfigure --frontend=noninteractive locales \
+    && update-locale LANG="${LANG}"
