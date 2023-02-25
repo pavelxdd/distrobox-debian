@@ -38,8 +38,6 @@ RUN --mount=type=bind,target=/app \
     && dpkg --add-architecture armhf \
     && dpkg --add-architecture arm64 \
     \
-    && sed -i 's/http:/https:/g' /etc/apt/sources.list \
-    \
     && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key \
         | gpg --no-tty --dearmor -o /etc/apt/trusted.gpg.d/nodesource.gpg \
     && printf "deb [arch=amd64] %s %s\n" \
@@ -60,8 +58,16 @@ RUN --mount=type=bind,target=/app \
               "https://files.pvs-studio.com/deb" \
               "viva64-release pvs-studio" > /etc/apt/sources.list.d/viva64.list \
     \
-    && apt-get update \
-    && apt-get full-upgrade -yqq --auto-remove --purge \
+    && install -m755 /app/update-alternatives-gcc.sh /usr/local/bin/update-alternatives-gcc \
+    && install -m755 /app/update-alternatives-clang.sh /usr/local/bin/update-alternatives-clang \
+    \
+    && sed -i 's/http:/https:/g' /etc/apt/sources.list
+
+RUN --mount=type=tmpfs,target=/tmp \
+    --mount=type=tmpfs,target=/var/lib/apt \
+    --mount=type=tmpfs,target=/var/cache/apt \
+    \
+    apt-get update && apt-get full-upgrade -yqq --auto-remove --purge \
     && apt-get install -yqq --no-install-recommends \
         astyle \
         autoconf \
@@ -121,6 +127,7 @@ RUN --mount=type=bind,target=/app \
         manpages \
         mc \
         mkcert \
+        nala \
         nano \
         nasm \
         netcat-openbsd \
@@ -154,10 +161,7 @@ RUN --mount=type=bind,target=/app \
         zsh \
         zstd \
     \
-    && install -m755 /app/update-alternatives-gcc.sh /usr/local/bin/update-alternatives-gcc \
     && update-alternatives-gcc ${GCC_VERSION} 60 2> /dev/null \
-    \
-    && install -m755 /app/update-alternatives-clang.sh /usr/local/bin/update-alternatives-clang \
     && update-alternatives-clang ${LLVM_VERSION} 60 2> /dev/null \
     \
     && env NPM_CONFIG_CACHE=/tmp/npm npm i -g \
