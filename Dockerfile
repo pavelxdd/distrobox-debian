@@ -234,7 +234,8 @@ RUN --mount=type=tmpfs,target=/tmp \
 RUN --mount=type=tmpfs,target=/tmp \
     git clone --depth 1 --single-branch https://github.com/luarocks/luacheck.git \
     && cp -r luacheck/src/luacheck /usr/local/share/lua/5.1/ \
-    && install -Dm755 luacheck/bin/luacheck.lua /usr/local/bin/luacheck
+    && install -Dm755 luacheck/bin/luacheck.lua /usr/local/bin/luacheck \
+    && sed -i "s/env lua/env luajit/" /usr/local/bin/luacheck
 
 # zsh-syntax-highlighting
 RUN --mount=type=tmpfs,target=/tmp share_dir=/usr/share/zsh/plugins/zsh-syntax-highlighting \
@@ -264,6 +265,6 @@ RUN --mount=type=tmpfs,target=/tmp version=0.15.1 name=git-delta_${version}_amd6
 
 # locales
 ENV LANG en_US.UTF-8
-RUN sed -i -e "s/# ${LANG} UTF-8/${LANG} UTF-8/" /etc/locale.gen \
+RUN sed -i "s/# ${LANG} UTF-8/${LANG} UTF-8/" /etc/locale.gen \
     && dpkg-reconfigure --frontend=noninteractive locales \
     && update-locale LANG="${LANG}"
