@@ -80,12 +80,9 @@ RUN --mount=type=tmpfs,target=/tmp \
         flex \
         htop \
         gawk \
-        g++-${GCC_VERSION} \
-        g++-${GCC_VERSION}-aarch64-linux-gnu \
-        g++-${GCC_VERSION}-arm-linux-gnueabihf \
-        gcc-${GCC_VERSION} \
-        gcc-${GCC_VERSION}-aarch64-linux-gnu \
-        gcc-${GCC_VERSION}-arm-linux-gnueabihf \
+        {gcc,g++}-${GCC_VERSION} \
+        {gcc,g++}-${GCC_VERSION}-arm-linux-gnueabihf \
+        {gcc,g++}-${GCC_VERSION}-aarch64-linux-gnu \
         gdb-multiarch \
         gdbserver \
         gettext \
