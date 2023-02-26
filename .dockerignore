@@ -1,6 +1,6 @@
 *
-!dpkg.cfg
 !apt.conf
+!dpkg.cfg
 !sources.list
 !update-alternatives-gcc.sh
 !update-alternatives-clang.sh

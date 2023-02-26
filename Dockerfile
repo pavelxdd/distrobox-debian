@@ -21,16 +21,12 @@ ARG NODE_VERSION=18
 
 RUN --mount=type=bind,target=/app \
     --mount=type=tmpfs,target=/tmp \
-    --mount=type=tmpfs,target=/var/lib/apt \
-    --mount=type=tmpfs,target=/var/cache/apt \
     \
     rm -f /etc/apt/sources.list.d/* /etc/apt/preferences \
     \
-    && install -m644 /app/dpkg.cfg /etc/dpkg/dpkg.cfg.d/local \
-    && install -m644 /app/apt.conf /etc/apt/apt.conf.d/local \
     && install -m644 /app/sources.list /etc/apt/sources.list \
-    && install -m755 /app/update-alternatives-gcc.sh /usr/local/bin/update-alternatives-gcc \
-    && install -m755 /app/update-alternatives-clang.sh /usr/local/bin/update-alternatives-clang \
+    && install -m644 /app/apt.conf /etc/apt/apt.conf.d/99local \
+    && install -m644 /app/dpkg.cfg /etc/dpkg/dpkg.cfg.d/99local \
     \
     && apt-get update && apt-get install -yqq --no-install-recommends \
         ca-certificates gpg curl \
@@ -53,13 +49,9 @@ RUN --mount=type=bind,target=/app \
               "viva64-release pvs-studio" > /etc/apt/sources.list.d/viva64.list \
     \
     && sed -i "s/http:/https:/g" /etc/apt/sources.list \
-    && apt-get autoremove --purge -yqq
-
-RUN --mount=type=tmpfs,target=/tmp \
-    --mount=type=tmpfs,target=/var/lib/apt \
-    --mount=type=tmpfs,target=/var/cache/apt \
     \
-    apt-get update && apt-get full-upgrade -yqq --auto-remove --purge \
+    && apt-get update \
+    && apt-get full-upgrade -yqq --auto-remove --purge \
     && apt-get install -yqq --no-install-recommends \
         apt-utils \
         astyle \
@@ -75,6 +67,7 @@ RUN --mount=type=tmpfs,target=/tmp \
         busybox \
         clang-${LLVM_VERSION} \
         cmake \
+        deborphan \
         dialog \
         diffutils \
         file \
@@ -166,7 +159,10 @@ RUN --mount=type=tmpfs,target=/tmp \
         zsh \
         zstd \
     \
+    && install -m755 /app/update-alternatives-gcc.sh /usr/local/bin/update-alternatives-gcc \
     && update-alternatives-gcc ${GCC_VERSION} 60 2> /dev/null \
+    \
+    && install -m755 /app/update-alternatives-clang.sh /usr/local/bin/update-alternatives-clang \
     && update-alternatives-clang ${LLVM_VERSION} 60 2> /dev/null \
     \
     && ln -s /usr/local/bin/host-spawn /usr/local/bin/flatpak \
@@ -185,7 +181,9 @@ RUN --mount=type=tmpfs,target=/tmp \
         yarn@latest \
         wscat \
     \
-    && apt-get autoremove --purge -yqq
+    && apt-get autoremove --purge -yqq \
+    && apt-get clean -yqq \
+    && rm -rf /var/lib/apt/lists/*
 
 ARG MAKEFLAGS="-j4"
 ARG CFLAGS="-march=x86-64 -mtune=generic -O2 -pipe -g -DNDEBUG -pthread -fPIC -DPIC \
