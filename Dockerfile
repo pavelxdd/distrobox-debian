@@ -12,8 +12,8 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
-ARG NPM_CONFIG_AUDIT=false
-ARG NPM_CONFIG_FUND=false
+ENV NPM_CONFIG_AUDIT=false
+ENV NPM_CONFIG_FUND=false
 
 ARG GCC_VERSION=12
 ARG LLVM_VERSION=15
@@ -24,13 +24,13 @@ RUN --mount=type=bind,target=/app \
     --mount=type=tmpfs,target=/var/lib/apt \
     --mount=type=tmpfs,target=/var/cache/apt \
     \
-    rm -f \
-        /etc/apt/sources.list.d/* \
-        /etc/apt/preferences \
+    rm -f /etc/apt/sources.list.d/* /etc/apt/preferences \
     \
-    && cat /app/dpkg.cfg > /etc/dpkg/dpkg.cfg.d/local \
-    && cat /app/apt.conf > /etc/apt/apt.conf.d/local \
-    && cat /app/sources.list > /etc/apt/sources.list \
+    && install -m644 /app/dpkg.cfg /etc/dpkg/dpkg.cfg.d/local \
+    && install -m644 /app/apt.conf /etc/apt/apt.conf.d/local \
+    && install -m644 /app/sources.list /etc/apt/sources.list \
+    && install -m755 /app/update-alternatives-gcc.sh /usr/local/bin/update-alternatives-gcc \
+    && install -m755 /app/update-alternatives-clang.sh /usr/local/bin/update-alternatives-clang \
     \
     && apt-get update && apt-get install -yqq --no-install-recommends \
         ca-certificates gpg curl \
@@ -52,10 +52,8 @@ RUN --mount=type=bind,target=/app \
               "https://files.pvs-studio.com/deb" \
               "viva64-release pvs-studio" > /etc/apt/sources.list.d/viva64.list \
     \
-    && install -m755 /app/update-alternatives-gcc.sh /usr/local/bin/update-alternatives-gcc \
-    && install -m755 /app/update-alternatives-clang.sh /usr/local/bin/update-alternatives-clang \
-    \
-    && sed -i 's/http:/https:/g' /etc/apt/sources.list
+    && sed -i "s/http:/https:/g" /etc/apt/sources.list \
+    && apt-get autoremove --purge -yqq
 
 RUN --mount=type=tmpfs,target=/tmp \
     --mount=type=tmpfs,target=/var/lib/apt \
@@ -108,9 +106,8 @@ RUN --mount=type=tmpfs,target=/tmp \
         libnss-myhostname \
         libpython3-dev \
         libssl-dev:amd64 \
-        libssl-dev:arm64 \
         libssl-dev:armhf \
-        libtool \
+        libssl-dev:arm64 \
         libtool-bin \
         libvte-2.9[0-9]-common \
         libvte-common \
@@ -137,7 +134,6 @@ RUN --mount=type=tmpfs,target=/tmp \
         ninja-build \
         nodejs \
         openssh-client \
-        p7zip \
         p7zip-rar \
         p7zip-full \
         pahole \
@@ -216,7 +212,7 @@ RUN --mount=type=tmpfs,target=/tmp \
 # starship
 RUN --mount=type=tmpfs,target=/tmp name=starship-x86_64-unknown-linux-gnu \
     && curl -fsSL https://github.com/starship/starship/releases/latest/download/${name}.tar.gz \
-        | tar xz && install -m755 starship /usr/local/bin/starship
+        | tar xz && install -m755 -t /usr/local/bin starship
 
 # hadolint
 ADD --chmod=755 --chown=root:root \
@@ -272,7 +268,7 @@ RUN --mount=type=tmpfs,target=/tmp share_dir=/usr/share/zsh/plugins/zsh-syntax-h
 RUN --mount=type=tmpfs,target=/tmp share_dir=/usr/share/zsh/plugins/zsh-autosuggestions \
     && git clone --depth 1 --single-branch https://github.com/zsh-users/zsh-autosuggestions.git \
     && make -C zsh-autosuggestions \
-    && install -Dm644 zsh-autosuggestions/zsh-autosuggestions.zsh "${share_dir}/zsh-autosuggestions.zsh" \
+    && install -Dm644 -t "${share_dir}" zsh-autosuggestions/zsh-autosuggestions.zsh \
     && ln -s zsh-autosuggestions.zsh "${share_dir}/zsh-autosuggestions.plugin.zsh"
 
 # ble.sh
