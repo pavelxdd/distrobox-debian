@@ -173,14 +173,14 @@ RUN --mount=type=tmpfs,target=/tmp \
     && update-alternatives-gcc ${GCC_VERSION} 60 2> /dev/null \
     && update-alternatives-clang ${LLVM_VERSION} 60 2> /dev/null \
     \
-    && ln -s /usr/bin/distrobox-host-exec /usr/local/bin/flatpak \
-    && ln -s /usr/bin/distrobox-host-exec /usr/local/bin/flatpak-bisect \
-    && ln -s /usr/bin/distrobox-host-exec /usr/local/bin/flatpak-coredumpctl \
+    && ln -s /usr/local/bin/host-spawn /usr/local/bin/flatpak \
+    && ln -s /usr/local/bin/host-spawn /usr/local/bin/flatpak-bisect \
+    && ln -s /usr/local/bin/host-spawn /usr/local/bin/flatpak-coredumpctl \
     \
-    && ln -s /usr/bin/distrobox-host-exec /usr/local/bin/docker \
-    && ln -s /usr/bin/distrobox-host-exec /usr/local/bin/docker-init \
-    && ln -s /usr/bin/distrobox-host-exec /usr/local/bin/docker-proxy \
-    && ln -s /usr/bin/distrobox-host-exec /usr/local/bin/docker-compose \
+    && ln -s /usr/local/bin/host-spawn /usr/local/bin/docker \
+    && ln -s /usr/local/bin/host-spawn /usr/local/bin/docker-init \
+    && ln -s /usr/local/bin/host-spawn /usr/local/bin/docker-proxy \
+    && ln -s /usr/local/bin/host-spawn /usr/local/bin/docker-compose \
     \
     && setcap cap_sys_chroot+ep /usr/sbin/chroot \
     \
