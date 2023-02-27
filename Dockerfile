@@ -117,6 +117,7 @@ RUN --mount=type=bind,target=/app \
         manpages \
         mc \
         mesa-vulkan-drivers \
+        meson \
         mkcert \
         nala \
         nano \
@@ -150,6 +151,7 @@ RUN --mount=type=bind,target=/app \
         sudo \
         swig \
         time \
+        tmux \
         tree \
         tzdata \
         util-linux \
@@ -186,11 +188,11 @@ RUN --mount=type=bind,target=/app \
     && rm -rf /var/lib/apt/lists/*
 
 ARG MAKEFLAGS="-j4"
-ARG CFLAGS="-march=x86-64 -mtune=generic -O2 -pipe -g -DNDEBUG -pthread -fPIC -DPIC \
--fno-plt -fexceptions -fstack-clash-protection -fcf-protection \
+ARG CFLAGS="-march=x86-64-v3 -mtune=generic -O2 -pipe \
+-flto=auto -fno-fat-lto-objects -fno-plt -fexceptions \
+-fstack-clash-protection -fcf-protection \
 -falign-functions=32 -ftree-vectorize -ftree-slp-vectorize \
--Wp,-D_FORTIFY_SOURCE=3 -Wformat -Werror=format-security -Wno-stringop-overflow \
--D_GNU_SOURCE -D_LARGE_FILES -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_TIME_BITS=64"
+-Wp,-D_FORTIFY_SOURCE=3 -Wformat -Werror=format-security"
 ARG CXXFLAGS="${CFLAGS} -Wp,-D_GLIBCXX_ASSERTIONS"
 ARG LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now,-z,pack-relative-relocs"
 
