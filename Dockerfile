@@ -127,7 +127,6 @@ RUN --mount=type=bind,target=/app \
         ncurses-base \
         neofetch \
         netcat-openbsd \
-        ninja-build \
         nodejs \
         openssh-client \
         p7zip-rar \
@@ -192,11 +191,16 @@ RUN --mount=type=bind,target=/app \
 ARG MAKEFLAGS="-j4"
 ARG MARCH="x86-64-v3"
 ARG MTUNE="generic"
-ARG CFLAGS="-march=${MARCH} -mtune=${MTUNE} -O2 -pipe -g0 -DNDEBUG -pthread -fPIC -DPIC \
--fno-plt -falign-functions=32 -ftree-vectorize -ftree-slp-vectorize -Wno-stringop-overflow \
--D_GNU_SOURCE -D_LARGE_FILES -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_TIME_BITS=64"
+ARG CFLAGS="-march=${MARCH} -mtune=${MTUNE} -O2 -pipe -g0 -DNDEBUG -pthread \
+-fPIC -DPIC -fno-plt -falign-functions=32 -ftree-vectorize -ftree-slp-vectorize"
 ARG CXXFLAGS="${CFLAGS}"
 ARG LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now,-z,pack-relative-relocs -s"
+
+# samurai
+RUN --mount=type=tmpfs,target=/tmp \
+    git clone --depth 1 --single-branch https://github.com/michaelforney/samurai.git \
+    && make -C samurai install PREFIX=/usr/local \
+    && ln -s samu /usr/local/bin/ninja
 
 # how-to-use-pvs-studio-free
 RUN --mount=type=tmpfs,target=/tmp \
