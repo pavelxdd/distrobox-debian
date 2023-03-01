@@ -191,10 +191,10 @@ RUN --mount=type=bind,target=/app \
 ARG MAKEFLAGS="-j4"
 ARG MARCH="x86-64-v3"
 ARG MTUNE="generic"
-ARG CFLAGS="-march=${MARCH} -mtune=${MTUNE} -O2 -pipe -g0 -DNDEBUG -pthread \
--fPIC -DPIC -fno-plt -falign-functions=32 -ftree-vectorize -ftree-slp-vectorize"
+ARG CC=gcc
+ARG CFLAGS="-march=${MARCH} -mtune=${MTUNE} -O2 -ftree-vectorize -pipe -g0"
 ARG CXXFLAGS="${CFLAGS}"
-ARG LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now,-z,pack-relative-relocs -s"
+ARG LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now -s"
 
 # samurai
 RUN --mount=type=tmpfs,target=/tmp \
