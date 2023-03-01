@@ -192,6 +192,7 @@ ARG MAKEFLAGS="-j4"
 ARG MARCH="x86-64-v3"
 ARG MTUNE="generic"
 ARG CC=gcc
+ARG CXX=g++
 ARG CFLAGS="-march=${MARCH} -mtune=${MTUNE} \
 -O2 -ftree-vectorize -pipe -g0 -DNDEBUG -pthread -fPIC -DPIC -fno-plt"
 ARG CXXFLAGS="${CFLAGS}"
