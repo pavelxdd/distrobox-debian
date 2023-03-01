@@ -119,6 +119,8 @@ RUN --mount=type=bind,target=/app \
         mesa-vulkan-drivers \
         meson \
         mkcert \
+        musl-dev \
+        musl-tools \
         nala \
         nano \
         nasm \
@@ -188,13 +190,13 @@ RUN --mount=type=bind,target=/app \
     && rm -rf /var/lib/apt/lists/*
 
 ARG MAKEFLAGS="-j4"
-ARG CFLAGS="-march=x86-64-v3 -mtune=generic -O2 -pipe \
--flto=auto -fno-fat-lto-objects -fno-plt -fexceptions \
--fstack-clash-protection -fcf-protection \
--falign-functions=32 -ftree-vectorize -ftree-slp-vectorize \
--Wp,-D_FORTIFY_SOURCE=3 -Wformat -Werror=format-security"
-ARG CXXFLAGS="${CFLAGS} -Wp,-D_GLIBCXX_ASSERTIONS"
-ARG LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now,-z,pack-relative-relocs"
+ARG MARCH="x86-64-v3"
+ARG MTUNE="generic"
+ARG CFLAGS="-march=${MARCH} -mtune=${MTUNE} -O2 -pipe -g0 -DNDEBUG -pthread -fPIC -DPIC \
+-fno-plt -falign-functions=32 -ftree-vectorize -ftree-slp-vectorize -Wno-stringop-overflow \
+-D_GNU_SOURCE -D_LARGE_FILES -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_TIME_BITS=64"
+ARG CXXFLAGS="${CFLAGS}"
+ARG LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now,-z,pack-relative-relocs -s"
 
 # how-to-use-pvs-studio-free
 RUN --mount=type=tmpfs,target=/tmp \
@@ -280,6 +282,11 @@ RUN --mount=type=tmpfs,target=/tmp \
 RUN --mount=type=tmpfs,target=/tmp version=0.15.1 name=git-delta_${version}_amd64 \
     && curl -fsSLO https://github.com/dandavison/delta/releases/download/${version}/${name}.deb \
     && dpkg -i ${name}.deb
+
+# upx
+RUN --mount=type=tmpfs,target=/tmp version=4.0.2 \
+    && curl -fsSL https://github.com/upx/upx/releases/download/v${version}/upx-${version}-amd64_linux.tar.xz \
+        | tar xJ && install -m755 upx-${version}-amd64_linux/upx /usr/local/bin/upx
 
 # locales
 ENV LANG en_US.UTF-8

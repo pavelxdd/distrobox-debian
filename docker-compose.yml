@@ -5,6 +5,8 @@ services:
       context: .
       args:
         - MAKEFLAGS=${MAKEFLAGS:--j4}
+        - MARCH=${MARCH:-x86-64-v3}
+        - MTUNE=${MTUNE:-generic}
     image: docker.io/pavelxdd/distrobox-debian:sid
     container_name: distrobox-debian
     network_mode: host
@@ -20,3 +22,5 @@ services:
       - HOME=/root
       - WORKSPACE=${WORKSPACE:-.}
       - MAKEFLAGS=${MAKEFLAGS:--j4}
+      - MARCH=${MARCH:-x86-64-v3}
+      - MTUNE=${MTUNE:-generic}
