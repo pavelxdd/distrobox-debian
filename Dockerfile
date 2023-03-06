@@ -148,6 +148,7 @@ RUN --mount=type=bind,target=/app \
         rsync \
         shellcheck \
         squashfs-tools \
+        sshpass \
         strace \
         sudo \
         swig \
