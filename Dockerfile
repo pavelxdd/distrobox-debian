@@ -94,6 +94,7 @@ RUN --mount=type=bind,target=/app \
         libcunit1-dev \
         libegl1-mesa \
         libgl1-mesa-glx \
+        libev-dev \
         liblua5.4-dev \
         libluajit-5.1-dev \
         libnss-myhostname \
@@ -147,6 +148,7 @@ RUN --mount=type=bind,target=/app \
         python3-setuptools \
         rsync \
         shellcheck \
+        shfmt \
         squashfs-tools \
         sshpass \
         strace \
@@ -294,6 +296,67 @@ RUN --mount=type=tmpfs,target=/tmp version=0.15.1 name=git-delta_${version}_amd6
 RUN --mount=type=tmpfs,target=/tmp version=4.0.2 \
     && curl -fsSL https://github.com/upx/upx/releases/download/v${version}/upx-${version}-amd64_linux.tar.xz \
         | tar xJ && install -m755 upx-${version}-amd64_linux/upx /usr/local/bin/upx
+
+# freebsd <sys/queue.h>
+ADD --chmod=644 --chown=root:root \
+    https://raw.githubusercontent.com/freebsd/freebsd-src/main/sys/sys/queue.h \
+    /usr/local/include/freebsd/sys/queue.h
+
+# pthread_wrapper
+RUN --mount=type=tmpfs,target=/tmp \
+    git clone --depth 1 --single-branch https://github.com/pavelxdd/pthread_wrapper.git \
+    && cmake -Wno-dev \
+        -G Ninja \
+        -S pthread_wrapper \
+        -B pthread_wrapper/build \
+        -D CMAKE_INSTALL_PREFIX=/usr/local \
+    && cmake --install pthread_wrapper/build
+
+# circleq
+RUN --mount=type=tmpfs,target=/tmp \
+    git clone --depth 1 --single-branch https://github.com/pavelxdd/circleq.git \
+    && cmake -Wno-dev \
+        -G Ninja \
+        -S circleq \
+        -B circleq/build \
+        -D CMAKE_INSTALL_PREFIX=/usr/local \
+    && cmake --install circleq/build
+
+# tbtree
+RUN --mount=type=tmpfs,target=/tmp \
+    git clone --depth 1 --single-branch https://github.com/pavelxdd/tbtree.git \
+    && cmake -Wno-dev \
+        -G Ninja \
+        -S tbtree \
+        -B tbtree/build \
+        -D CMAKE_INSTALL_PREFIX=/usr/local \
+    && cmake --install tbtree/build
+
+# raii
+RUN --mount=type=tmpfs,target=/tmp \
+    git clone --depth 1 --single-branch https://github.com/pavelxdd/raii.git \
+    && cmake -Wno-dev \
+        -G Ninja \
+        -S raii \
+        -B raii/build \
+        -D CMAKE_INSTALL_PREFIX=/usr/local \
+    && cmake --install raii/build
+
+# ta
+RUN --mount=type=tmpfs,target=/tmp \
+    git clone --depth 1 --single-branch https://github.com/pavelxdd/ta.git \
+    && cmake -Wno-dev \
+        -G Ninja \
+        -S ta \
+        -B ta/build \
+        -D CMAKE_BUILD_TYPE=Release \
+        -D CMAKE_INSTALL_PREFIX=/usr/local \
+        -D CMAKE_INSTALL_LIBDIR=/usr/local/lib \
+        -D BUILD_SHARED_LIBS=ON \
+    && cmake --build ta/build \
+    && cmake --install ta/build \
+    && strip -s "$(readlink -f /usr/local/lib/libta.so)" \
+    && chmod 644 "$(readlink -f /usr/local/lib/libta.so)"
 
 # locales
 ENV LANG en_US.UTF-8
