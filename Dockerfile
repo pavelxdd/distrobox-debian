@@ -303,48 +303,28 @@ ADD --chmod=644 --chown=root:root \
     /usr/local/include/freebsd/sys/queue.h
 
 # pthread_wrapper
-RUN --mount=type=tmpfs,target=/tmp \
-    git clone --depth 1 --single-branch https://github.com/pavelxdd/pthread_wrapper.git \
-    && cmake -Wno-dev \
-        -G Ninja \
-        -S pthread_wrapper \
-        -B pthread_wrapper/build \
-        -D CMAKE_INSTALL_PREFIX=/usr/local \
-    && cmake --install pthread_wrapper/build
+ADD --chmod=644 --chown=root:root \
+    https://raw.githubusercontent.com/pavelxdd/pthread_wrapper/master/src/pthread_wrapper.h \
+    /usr/local/include/
 
 # circleq
-RUN --mount=type=tmpfs,target=/tmp \
-    git clone --depth 1 --single-branch https://github.com/pavelxdd/circleq.git \
-    && cmake -Wno-dev \
-        -G Ninja \
-        -S circleq \
-        -B circleq/build \
-        -D CMAKE_INSTALL_PREFIX=/usr/local \
-    && cmake --install circleq/build
+ADD --chmod=644 --chown=root:root \
+    https://raw.githubusercontent.com/pavelxdd/circleq/master/src/circleq.h \
+    /usr/local/include/
 
 # tbtree
-RUN --mount=type=tmpfs,target=/tmp \
-    git clone --depth 1 --single-branch https://github.com/pavelxdd/tbtree.git \
-    && cmake -Wno-dev \
-        -G Ninja \
-        -S tbtree \
-        -B tbtree/build \
-        -D CMAKE_INSTALL_PREFIX=/usr/local \
-    && cmake --install tbtree/build
+ADD --chmod=644 --chown=root:root \
+    https://raw.githubusercontent.com/pavelxdd/tbtree/master/src/tbtree.h \
+    /usr/local/include/
 
 # raii
-RUN --mount=type=tmpfs,target=/tmp \
-    git clone --depth 1 --single-branch https://github.com/pavelxdd/raii.git \
-    && cmake -Wno-dev \
-        -G Ninja \
-        -S raii \
-        -B raii/build \
-        -D CMAKE_INSTALL_PREFIX=/usr/local \
-    && cmake --install raii/build
+ADD --chmod=644 --chown=root:root \
+    https://raw.githubusercontent.com/pavelxdd/raii/master/src/raii.h \
+    /usr/local/include/
 
 # ta
-RUN --mount=type=tmpfs,target=/tmp \
-    git clone --depth 1 --single-branch https://github.com/pavelxdd/ta.git \
+RUN cd /usr/local/src \
+    && git clone --depth 1 --single-branch https://github.com/pavelxdd/ta.git \
     && cmake -Wno-dev \
         -G Ninja \
         -S ta \
@@ -352,11 +332,31 @@ RUN --mount=type=tmpfs,target=/tmp \
         -D CMAKE_BUILD_TYPE=Release \
         -D CMAKE_INSTALL_PREFIX=/usr/local \
         -D CMAKE_INSTALL_LIBDIR=/usr/local/lib \
-        -D BUILD_SHARED_LIBS=ON \
+        -D BUILD_SHARED_LIBS=OFF \
     && cmake --build ta/build \
-    && cmake --install ta/build \
-    && strip -s "$(readlink -f /usr/local/lib/libta.so)" \
-    && chmod 644 "$(readlink -f /usr/local/lib/libta.so)"
+    && cmake --install ta/build
+
+# yyjson
+RUN cd /usr/local/src \
+    && git clone --depth 1 --single-branch https://github.com/ibireme/yyjson.git \
+    && cmake -Wno-dev \
+        -G Ninja \
+        -S yyjson \
+        -B yyjson/build \
+        -D CMAKE_BUILD_TYPE=Release \
+        -D CMAKE_INSTALL_PREFIX=/usr/local \
+        -D CMAKE_INSTALL_LIBDIR=/usr/local/lib \
+        -D BUILD_SHARED_LIBS=OFF \
+    && cmake --build yyjson/build \
+    && cmake --install yyjson/build
+
+# mpack
+RUN cd /usr/local/src \
+    && git clone --depth 1 --single-branch https://github.com/ludocode/mpack.git \
+    && cd mpack && tools/amalgamate.sh && cd .build/amalgamation/src/mpack \
+    && gcc -c mpack.c -o mpack.o && ar rcs libmpack.a mpack.o \
+    && install -m644 -t /usr/local/lib libmpack.a \
+    && install -m644 -t /usr/local/include mpack.h
 
 # locales
 ENV LANG en_US.UTF-8
