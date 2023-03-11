@@ -8,6 +8,12 @@ repos:
     types: [shell]
     require_serial: true
 
+  - id: shfmt
+    name: shfmt
+    entry: shfmt -s -ci -sr -fn -i 2 -w
+    language: system
+    types: [shell]
+
   - id: hadolint
     name: hadolint
     entry: hadolint
