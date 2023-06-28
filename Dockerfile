@@ -15,8 +15,8 @@ ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 ENV NPM_CONFIG_AUDIT=false
 ENV NPM_CONFIG_FUND=false
 
-ARG GCC_VERSION=12
-ARG LLVM_VERSION=15
+ARG GCC_VERSION=13
+ARG LLVM_VERSION=16
 ARG NODE_VERSION=18
 
 RUN --mount=type=bind,target=/app \
@@ -210,6 +210,7 @@ RUN --mount=type=tmpfs,target=/tmp \
 # how-to-use-pvs-studio-free
 RUN --mount=type=tmpfs,target=/tmp \
     git clone --depth 1 --single-branch https://github.com/viva64/how-to-use-pvs-studio-free.git \
+    && sed -i '1s;^;#include <cstdint>\n;' how-to-use-pvs-studio-free/comments.h \
     && cmake -Wno-dev \
         -G Ninja \
         -S how-to-use-pvs-studio-free \
