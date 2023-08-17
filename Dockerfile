@@ -67,7 +67,9 @@ RUN --mount=type=bind,target=/app \
         busybox \
         clang-${LLVM_VERSION} \
         cmake \
+        debhelper \
         deborphan \
+        devscripts \
         dialog \
         diffutils \
         file \
@@ -92,6 +94,7 @@ RUN --mount=type=bind,target=/app \
         kmod \
         less \
         libcunit1-dev \
+        libdistro-info-perl \
         libegl1-mesa \
         libgl1-mesa-glx \
         libev-dev \
@@ -289,12 +292,12 @@ RUN --mount=type=tmpfs,target=/tmp \
     && make -C ble.sh install PREFIX=/usr INSDIR_DOC="$(mktemp -d)"
 
 # git-delta
-RUN --mount=type=tmpfs,target=/tmp version=0.15.1 name=git-delta_${version}_amd64 \
+RUN --mount=type=tmpfs,target=/tmp version=0.16.5 name=git-delta_${version}_amd64 \
     && curl -fsSLO https://github.com/dandavison/delta/releases/download/${version}/${name}.deb \
     && dpkg -i ${name}.deb
 
 # upx
-RUN --mount=type=tmpfs,target=/tmp version=4.0.2 \
+RUN --mount=type=tmpfs,target=/tmp version=4.1.0 \
     && curl -fsSL https://github.com/upx/upx/releases/download/v${version}/upx-${version}-amd64_linux.tar.xz \
         | tar xJ && install -m755 upx-${version}-amd64_linux/upx /usr/local/bin/upx
 
@@ -336,6 +339,20 @@ RUN cd /usr/local/src \
         -D BUILD_SHARED_LIBS=OFF \
     && cmake --build ta/build \
     && cmake --install ta/build
+
+# evio
+RUN cd /usr/local/src \
+    && git clone --depth 1 --single-branch https://github.com/pavelxdd/evio.git \
+    && cmake -Wno-dev \
+        -G Ninja \
+        -S evio \
+        -B evio/build \
+        -D CMAKE_BUILD_TYPE=Release \
+        -D CMAKE_INSTALL_PREFIX=/usr/local \
+        -D CMAKE_INSTALL_LIBDIR=/usr/local/lib \
+        -D BUILD_SHARED_LIBS=OFF \
+    && cmake --build evio/build \
+    && cmake --install evio/build
 
 # yyjson
 RUN cd /usr/local/src \
