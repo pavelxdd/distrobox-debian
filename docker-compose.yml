@@ -15,8 +15,8 @@ services:
       - ${WORKSPACE:-.}:/app
     working_dir: /app
     tmpfs:
-      - /tmp
-      - /root
+      - /tmp:mode=777
+      - /root:mode=777
     environment:
       - USER=root
       - HOME=/root
