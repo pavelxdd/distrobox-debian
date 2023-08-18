@@ -174,6 +174,8 @@ RUN --mount=type=bind,target=/app \
     && install -m755 /app/update-alternatives-clang.sh /usr/local/bin/update-alternatives-clang \
     && update-alternatives-clang ${LLVM_VERSION} 60 2> /dev/null \
     \
+    && update-alternatives --force --set editor /bin/nano \
+    \
     && ln -s /usr/local/bin/host-spawn /usr/local/bin/flatpak \
     && ln -s /usr/local/bin/host-spawn /usr/local/bin/flatpak-bisect \
     && ln -s /usr/local/bin/host-spawn /usr/local/bin/flatpak-coredumpctl \
