@@ -84,6 +84,7 @@ RUN --mount=type=bind,target=/app \
         gdbserver \
         gettext \
         git \
+        git-delta \
         gnupg2 \
         inetutils-ping \
         inetutils-traceroute \
@@ -166,6 +167,8 @@ RUN --mount=type=bind,target=/app \
         valgrind \
         wget \
         zsh \
+        zsh-autosuggestions \
+        zsh-syntax-highlighting \
         zstd \
     \
     && install -m755 /app/update-alternatives-gcc.sh /usr/local/bin/update-alternatives-gcc \
@@ -272,36 +275,10 @@ RUN --mount=type=tmpfs,target=/tmp \
     && install -Dm755 luacheck/bin/luacheck.lua /usr/local/bin/luacheck \
     && sed -i "s/env lua/env luajit/" /usr/local/bin/luacheck
 
-# zsh-syntax-highlighting
-RUN --mount=type=tmpfs,target=/tmp share_dir=/usr/share/zsh/plugins/zsh-syntax-highlighting \
-    && git clone --depth 1 --single-branch https://github.com/zsh-users/zsh-syntax-highlighting.git \
-    && make -C zsh-syntax-highlighting install \
-        PREFIX=/usr \
-        DOC_DIR="$(mktemp -d)" \
-        SHARE_DIR="${share_dir}" \
-    && ln -s zsh-syntax-highlighting.zsh "${share_dir}/zsh-syntax-highlighting.plugin.zsh"
-
-# zsh-autosuggestions
-RUN --mount=type=tmpfs,target=/tmp share_dir=/usr/share/zsh/plugins/zsh-autosuggestions \
-    && git clone --depth 1 --single-branch https://github.com/zsh-users/zsh-autosuggestions.git \
-    && make -C zsh-autosuggestions \
-    && install -Dm644 -t "${share_dir}" zsh-autosuggestions/zsh-autosuggestions.zsh \
-    && ln -s zsh-autosuggestions.zsh "${share_dir}/zsh-autosuggestions.plugin.zsh"
-
 # ble.sh
 RUN --mount=type=tmpfs,target=/tmp \
     git clone --depth 1 --single-branch --recurse-submodules https://github.com/akinomyoga/ble.sh.git \
     && make -C ble.sh install PREFIX=/usr INSDIR_DOC="$(mktemp -d)"
-
-# git-delta
-RUN --mount=type=tmpfs,target=/tmp version=0.16.5 name=git-delta_${version}_amd64 \
-    && curl -fsSLO https://github.com/dandavison/delta/releases/download/${version}/${name}.deb \
-    && dpkg -i ${name}.deb
-
-# upx
-RUN --mount=type=tmpfs,target=/tmp version=4.1.0 \
-    && curl -fsSL https://github.com/upx/upx/releases/download/v${version}/upx-${version}-amd64_linux.tar.xz \
-        | tar xJ && install -m755 upx-${version}-amd64_linux/upx /usr/local/bin/upx
 
 # freebsd <sys/queue.h>
 ADD --chmod=644 --chown=root:root \
