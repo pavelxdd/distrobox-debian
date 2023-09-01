@@ -7,9 +7,6 @@ ARG LANG=C.UTF-8
 ARG LANGUAGE=${LANG}
 ARG LC_ALL=${LANG}
 
-ARG TZ=Europe/Moscow
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-
 ARG DEBIAN_FRONTEND=noninteractive
 ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 ENV NPM_CONFIG_AUDIT=false
