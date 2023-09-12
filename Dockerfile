@@ -1,6 +1,5 @@
 # syntax=docker/dockerfile:1
 FROM docker.io/amd64/debian:sid as debian
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 WORKDIR /tmp
 
 ARG LANG=C.UTF-8
@@ -74,9 +73,12 @@ RUN --mount=type=bind,target=/app \
         flex \
         htop \
         gawk \
-        {gcc,g++}-${GCC_VERSION} \
-        {gcc,g++}-${GCC_VERSION}-arm-linux-gnueabihf \
-        {gcc,g++}-${GCC_VERSION}-aarch64-linux-gnu \
+        gcc-${GCC_VERSION} \
+        g++-${GCC_VERSION} \
+        gcc-${GCC_VERSION}-arm-linux-gnueabihf \
+        g++-${GCC_VERSION}-arm-linux-gnueabihf \
+        gcc-${GCC_VERSION}-aarch64-linux-gnu \
+        g++-${GCC_VERSION}-aarch64-linux-gnu \
         gdb-multiarch \
         gdbserver \
         gettext \
@@ -129,6 +131,7 @@ RUN --mount=type=bind,target=/app \
         ncurses-base \
         neofetch \
         netcat-openbsd \
+        ninja-build \
         nodejs \
         openssh-client \
         p7zip-rar \
@@ -169,16 +172,20 @@ RUN --mount=type=bind,target=/app \
         zstd \
     \
     && install -m755 /app/update-alternatives-gcc.sh /usr/local/bin/update-alternatives-gcc \
-    && update-alternatives-gcc ${GCC_VERSION} 60 2> /dev/null \
+    && update-alternatives-gcc "${GCC_VERSION}" 60 2> /dev/null \
     \
     && install -m755 /app/update-alternatives-clang.sh /usr/local/bin/update-alternatives-clang \
-    && update-alternatives-clang ${LLVM_VERSION} 60 2> /dev/null \
+    && update-alternatives-clang "${LLVM_VERSION}" 60 2> /dev/null \
     \
     && update-alternatives --force --set editor /bin/nano \
     \
     && ln -s /usr/local/bin/host-spawn /usr/local/bin/flatpak \
     && ln -s /usr/local/bin/host-spawn /usr/local/bin/flatpak-bisect \
     && ln -s /usr/local/bin/host-spawn /usr/local/bin/flatpak-coredumpctl \
+    \
+    && ln -s /usr/local/bin/host-spawn /usr/local/bin/podman \
+    && ln -s /usr/local/bin/host-spawn /usr/local/bin/podman-remote \
+    && ln -s /usr/local/bin/host-spawn /usr/local/bin/podman-compose \
     \
     && ln -s /usr/local/bin/host-spawn /usr/local/bin/docker \
     && ln -s /usr/local/bin/host-spawn /usr/local/bin/docker-init \
@@ -205,12 +212,6 @@ ARG CFLAGS="-march=${MARCH} -mtune=${MTUNE} \
 -O2 -ftree-vectorize -pipe -g0 -DNDEBUG -pthread -fPIC -DPIC -fno-plt"
 ARG CXXFLAGS="${CFLAGS}"
 ARG LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now -s"
-
-# samurai
-RUN --mount=type=tmpfs,target=/tmp \
-    git clone --depth 1 --single-branch https://github.com/michaelforney/samurai.git \
-    && make -C samurai install PREFIX=/usr/local \
-    && ln -s samu /usr/local/bin/ninja
 
 # how-to-use-pvs-studio-free
 RUN --mount=type=tmpfs,target=/tmp \
@@ -271,11 +272,6 @@ RUN --mount=type=tmpfs,target=/tmp \
     && cp -r luacheck/src/luacheck /usr/local/share/lua/5.1/ \
     && install -Dm755 luacheck/bin/luacheck.lua /usr/local/bin/luacheck \
     && sed -i "s/env lua/env luajit/" /usr/local/bin/luacheck
-
-# ble.sh
-RUN --mount=type=tmpfs,target=/tmp \
-    git clone --depth 1 --single-branch --recurse-submodules https://github.com/akinomyoga/ble.sh.git \
-    && make -C ble.sh install PREFIX=/usr INSDIR_DOC="$(mktemp -d)"
 
 # freebsd <sys/queue.h>
 ADD --chmod=644 --chown=root:root \
