@@ -3,6 +3,7 @@ services:
   distrobox-debian:
     build:
       context: .
+      network: host
       args:
         - MAKEFLAGS=${MAKEFLAGS:--j4}
         - MARCH=${MARCH:-x86-64-v3}
@@ -24,3 +25,5 @@ services:
       - MAKEFLAGS=${MAKEFLAGS:--j4}
       - MARCH=${MARCH:-x86-64-v3}
       - MTUNE=${MTUNE:-generic}
+      - NPM_CONFIG_AUDIT=false
+      - NPM_CONFIG_FUND=false

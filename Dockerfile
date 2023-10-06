@@ -12,13 +12,15 @@ ENV NPM_CONFIG_AUDIT=false
 ENV NPM_CONFIG_FUND=false
 
 ARG GCC_VERSION=13
-ARG LLVM_VERSION=16
+ARG LLVM_VERSION=17
 ARG NODE_VERSION=20
 
 RUN --mount=type=bind,target=/app \
     --mount=type=tmpfs,target=/tmp \
     \
-    rm -f /etc/apt/sources.list.d/* /etc/apt/preferences \
+    rm -f \
+        /etc/apt/sources.list.d/* \
+        /etc/apt/preferences \
     \
     && install -m644 /app/sources.list /etc/apt/sources.list \
     && install -m644 /app/apt.conf /etc/apt/apt.conf.d/99local \
@@ -30,6 +32,14 @@ RUN --mount=type=bind,target=/app \
     && dpkg --add-architecture armhf \
     && dpkg --add-architecture arm64 \
     \
+    && curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key \
+        | gpg --no-tty --dearmor -o /etc/apt/trusted.gpg.d/llvm.gpg \
+    && printf "deb [arch=amd64] %s %s\n" \
+              "https://apt.llvm.org/unstable/" \
+              "llvm-toolchain-${LLVM_VERSION} main" > /etc/apt/sources.list.d/llvm.list \
+    && printf "Package: *\nPin: origin %s\nPin-Priority: %s\n" \
+              "apt.llvm.org" "900" > /etc/apt/preferences.d/llvm \
+    \
     && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key \
         | gpg --no-tty --dearmor -o /etc/apt/trusted.gpg.d/nodesource.gpg \
     && printf "deb [arch=amd64] %s %s\n" \
@@ -38,10 +48,10 @@ RUN --mount=type=bind,target=/app \
     && printf "Package: *\nPin: origin %s\nPin-Priority: %s\n" \
               "deb.nodesource.com" "900" > /etc/apt/preferences.d/nodesource \
     \
-    && curl -fsSL https://files.pvs-studio.com/etc/pubkey.txt \
+    && curl -fsSL https://cdn.pvs-studio.com/etc/pubkey.txt \
         | gpg --no-tty --dearmor -o /etc/apt/trusted.gpg.d/viva64.gpg \
     && printf "deb [arch=amd64] %s %s\n" \
-              "https://files.pvs-studio.com/deb" \
+              "https://cdn.pvs-studio.com/deb" \
               "viva64-release pvs-studio" > /etc/apt/sources.list.d/viva64.list \
     \
     && sed -i "s/http:/https:/g" /etc/apt/sources.list \
@@ -50,8 +60,10 @@ RUN --mount=type=bind,target=/app \
     && apt-get full-upgrade -yqq --auto-remove --purge \
     && apt-get install -yqq --no-install-recommends \
         apt-utils \
+        archlinux-keyring \
         astyle \
         autoconf \
+        autoconf-archive \
         automake \
         autopoint \
         bash \
@@ -60,12 +72,9 @@ RUN --mount=type=bind,target=/app \
         bind9-dnsutils \
         bison \
         build-essential \
-        busybox \
         clang-${LLVM_VERSION} \
         cmake \
-        debhelper \
         deborphan \
-        devscripts \
         dialog \
         diffutils \
         file \
@@ -83,13 +92,11 @@ RUN --mount=type=bind,target=/app \
         gdbserver \
         gettext \
         git \
-        git-delta \
         gnupg2 \
-        inetutils-ping \
-        inetutils-traceroute \
         iproute2 \
-        iptables \
         ipset \
+        iptables \
+        iputils-ping \
         jq \
         kmod \
         less \
@@ -117,6 +124,7 @@ RUN --mount=type=bind,target=/app \
         lsof \
         lua5.4 \
         luajit \
+        makepkg \
         man-db \
         manpages \
         mc \
@@ -134,6 +142,7 @@ RUN --mount=type=bind,target=/app \
         ninja-build \
         nodejs \
         openssh-client \
+        pacman-package-manager \
         p7zip-rar \
         p7zip-full \
         pahole \
@@ -160,6 +169,7 @@ RUN --mount=type=bind,target=/app \
         swig \
         time \
         tmux \
+        traceroute \
         tree \
         tzdata \
         util-linux \
@@ -171,10 +181,12 @@ RUN --mount=type=bind,target=/app \
         zsh-syntax-highlighting \
         zstd \
     \
-    && install -m755 /app/update-alternatives-gcc.sh /usr/local/bin/update-alternatives-gcc \
+    && install -m755 /app/update-alternatives-gcc.sh \
+        /usr/local/bin/update-alternatives-gcc \
     && update-alternatives-gcc "${GCC_VERSION}" 60 2> /dev/null \
     \
-    && install -m755 /app/update-alternatives-clang.sh /usr/local/bin/update-alternatives-clang \
+    && install -m755 /app/update-alternatives-clang.sh \
+        /usr/local/bin/update-alternatives-clang \
     && update-alternatives-clang "${LLVM_VERSION}" 60 2> /dev/null \
     \
     && update-alternatives --force --set editor /bin/nano \
@@ -186,6 +198,7 @@ RUN --mount=type=bind,target=/app \
     && ln -s /usr/local/bin/host-spawn /usr/local/bin/podman \
     && ln -s /usr/local/bin/host-spawn /usr/local/bin/podman-remote \
     && ln -s /usr/local/bin/host-spawn /usr/local/bin/podman-compose \
+    && ln -s /usr/local/bin/host-spawn /usr/local/bin/buildah \
     \
     && ln -s /usr/local/bin/host-spawn /usr/local/bin/docker \
     && ln -s /usr/local/bin/host-spawn /usr/local/bin/docker-init \
@@ -203,15 +216,24 @@ RUN --mount=type=bind,target=/app \
     && apt-get clean -yqq \
     && rm -rf /var/lib/apt/lists/*
 
-ARG MAKEFLAGS="-j4"
-ARG MARCH="x86-64-v3"
-ARG MTUNE="generic"
-ARG CC=gcc
-ARG CXX=g++
-ARG CFLAGS="-march=${MARCH} -mtune=${MTUNE} \
--O2 -ftree-vectorize -pipe -g0 -DNDEBUG -pthread -fPIC -DPIC -fno-plt"
-ARG CXXFLAGS="${CFLAGS}"
-ARG LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now -s"
+RUN --mount=type=bind,target=/app \
+    --mount=type=tmpfs,target=/tmp \
+    \
+    pacman --version \
+    \
+    && install -m644 /app/pacman.conf /etc/pacman.conf \
+    && install -Dm644 /app/mirrorlist /etc/pacman.d/mirrorlist \
+    \
+    && pacman-key --init \
+    && pacman-key --populate archlinux \
+    && pacman -Syyuudd --noconfirm \
+        luacheck \
+        lua-lanes \
+        lua-argparse \
+        lua-filesystem \
+        starship \
+    \
+    && pacman -Scc --noconfirm
 
 # how-to-use-pvs-studio-free
 RUN --mount=type=tmpfs,target=/tmp \
@@ -221,16 +243,12 @@ RUN --mount=type=tmpfs,target=/tmp \
         -G Ninja \
         -S how-to-use-pvs-studio-free \
         -B how-to-use-pvs-studio-free/build \
+        -D CMAKE_CXX_COMPILER=clang++ \
         -D CMAKE_BUILD_TYPE=Release \
         -D PVS_STUDIO_SHARED=OFF \
     && cmake --build how-to-use-pvs-studio-free/build \
     && cmake --install how-to-use-pvs-studio-free/build --prefix /usr/local \
     && strip -s /usr/local/bin/how-to-use-pvs-studio-free
-
-# starship
-RUN --mount=type=tmpfs,target=/tmp name=starship-x86_64-unknown-linux-gnu \
-    && curl -fsSL https://github.com/starship/starship/releases/latest/download/${name}.tar.gz \
-        | tar xz && install -m755 -t /usr/local/bin starship
 
 # hadolint
 ADD --chmod=755 --chown=root:root \
@@ -241,112 +259,6 @@ ADD --chmod=755 --chown=root:root \
 ADD --chmod=755 --chown=root:root \
     https://github.com/1player/host-spawn/releases/latest/download/host-spawn-x86_64 \
     /usr/local/bin/host-spawn
-
-# lua-argparse
-ADD --chmod=644 --chown=root:root \
-    https://raw.githubusercontent.com/luarocks/argparse/master/src/argparse.lua \
-    /usr/local/share/lua/5.1/argparse.lua
-
-# lua-filesystem
-RUN --mount=type=tmpfs,target=/tmp \
-    git clone --depth 1 --single-branch https://github.com/lunarmodules/luafilesystem.git \
-    && make -C luafilesystem LUA_INC=-I/usr/include/luajit-2.1 WARN="${CFLAGS}" \
-    && make -C luafilesystem PREFIX=/usr/local LUA_VERSION=5.1 install
-
-# lua-lanes
-RUN --mount=type=tmpfs,target=/tmp \
-    git clone --depth 1 --single-branch https://github.com/LuaLanes/lanes.git \
-    && sed -i "s/sudo = (geteuid() == 0)/sudo = 0/" lanes/src/lanes.c \
-    && make -C lanes install \
-        CFLAGS="${CFLAGS} -I/usr/include/luajit-2.1" \
-        LIBFLAG="-shared" \
-        LIBS="-lluajit-5.1 -lpthread" \
-        LUAROCKS=1 \
-        DESTDIR=/usr/local \
-        LUA_LIBDIR=/usr/local/lib/lua/5.1 \
-        LUA_SHAREDIR=/usr/local/share/lua/5.1
-
-# luacheck
-RUN --mount=type=tmpfs,target=/tmp \
-    git clone --depth 1 --single-branch https://github.com/luarocks/luacheck.git \
-    && cp -r luacheck/src/luacheck /usr/local/share/lua/5.1/ \
-    && install -Dm755 luacheck/bin/luacheck.lua /usr/local/bin/luacheck \
-    && sed -i "s/env lua/env luajit/" /usr/local/bin/luacheck
-
-# freebsd <sys/queue.h>
-ADD --chmod=644 --chown=root:root \
-    https://raw.githubusercontent.com/freebsd/freebsd-src/main/sys/sys/queue.h \
-    /usr/local/include/freebsd/sys/queue.h
-
-# pthread_wrapper
-ADD --chmod=644 --chown=root:root \
-    https://raw.githubusercontent.com/pavelxdd/pthread_wrapper/master/src/pthread_wrapper.h \
-    /usr/local/include/
-
-# circleq
-ADD --chmod=644 --chown=root:root \
-    https://raw.githubusercontent.com/pavelxdd/circleq/master/src/circleq.h \
-    /usr/local/include/
-
-# tbtree
-ADD --chmod=644 --chown=root:root \
-    https://raw.githubusercontent.com/pavelxdd/tbtree/master/src/tbtree.h \
-    /usr/local/include/
-
-# raii
-ADD --chmod=644 --chown=root:root \
-    https://raw.githubusercontent.com/pavelxdd/raii/master/src/raii.h \
-    /usr/local/include/
-
-# ta
-RUN cd /usr/local/src \
-    && git clone --depth 1 --single-branch https://github.com/pavelxdd/ta.git \
-    && cmake -Wno-dev \
-        -G Ninja \
-        -S ta \
-        -B ta/build \
-        -D CMAKE_BUILD_TYPE=Release \
-        -D CMAKE_INSTALL_PREFIX=/usr/local \
-        -D CMAKE_INSTALL_LIBDIR=/usr/local/lib \
-        -D BUILD_SHARED_LIBS=OFF \
-    && cmake --build ta/build \
-    && cmake --install ta/build
-
-# evio
-RUN cd /usr/local/src \
-    && git clone --depth 1 --single-branch https://github.com/pavelxdd/evio.git \
-    && cmake -Wno-dev \
-        -G Ninja \
-        -S evio \
-        -B evio/build \
-        -D CMAKE_BUILD_TYPE=Release \
-        -D CMAKE_INSTALL_PREFIX=/usr/local \
-        -D CMAKE_INSTALL_LIBDIR=/usr/local/lib \
-        -D BUILD_SHARED_LIBS=OFF \
-    && cmake --build evio/build \
-    && cmake --install evio/build
-
-# yyjson
-RUN cd /usr/local/src \
-    && git clone --depth 1 --single-branch https://github.com/ibireme/yyjson.git \
-    && cmake -Wno-dev \
-        -G Ninja \
-        -S yyjson \
-        -B yyjson/build \
-        -D CMAKE_BUILD_TYPE=Release \
-        -D CMAKE_INSTALL_PREFIX=/usr/local \
-        -D CMAKE_INSTALL_LIBDIR=/usr/local/lib \
-        -D BUILD_SHARED_LIBS=OFF \
-    && cmake --build yyjson/build \
-    && cmake --install yyjson/build
-
-# mpack
-RUN cd /usr/local/src \
-    && git clone --depth 1 --single-branch https://github.com/ludocode/mpack.git \
-    && cd mpack && tools/amalgamate.sh && cd .build/amalgamation/src/mpack \
-    && gcc -c mpack.c -o mpack.o && ar rcs libmpack.a mpack.o \
-    && install -m644 -t /usr/local/lib libmpack.a \
-    && install -m644 -t /usr/local/include mpack.h
 
 # locales
 ENV LANG en_US.UTF-8
