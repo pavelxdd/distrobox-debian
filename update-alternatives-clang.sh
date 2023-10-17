@@ -6,6 +6,8 @@ priority="$2"
 
 pkgs=(
   "clang-${version}"
+  "clang-tidy-${version}"
+  "clang-format-${version}"
   "llvm-${version}"
   "lldb-${version}"
   "lld-${version}"
@@ -21,4 +23,18 @@ for pkg in "${pkgs[@]}"; do
       update-alternatives --auto "${name}"
     done
   fi
+done
+
+pkgs=(
+  "clang"
+  "clang-${version}"
+  "clang++"
+  "clang++-${version}"
+)
+
+for pkg in "${pkgs[@]}"; do
+  name="x86_64-pc-linux-gnu-${pkg}"
+  update-alternatives --force --remove-all "${name}" 2> /dev/null | true
+  update-alternatives --force --install "/usr/bin/${name}" "${name}" "/usr/bin/${pkg}" "${priority}"
+  update-alternatives --force --set "${name}" "/usr/bin/${pkg}"
 done

@@ -73,6 +73,8 @@ RUN --mount=type=bind,target=/app \
         bison \
         build-essential \
         clang-${LLVM_VERSION} \
+        clang-tidy-${LLVM_VERSION} \
+        clang-format-${LLVM_VERSION} \
         cmake \
         deborphan \
         dialog \
