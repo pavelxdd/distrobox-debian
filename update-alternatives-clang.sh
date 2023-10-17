@@ -6,13 +6,15 @@ priority="$2"
 
 pkgs=(
   "clang-${version}"
-  "clang-tidy-${version}"
-  "run-clang-tidy-${version}"
   "clang-format-${version}"
-  "git-clang-format-${version}"
-  "llvm-${version}"
-  "lldb-${version}"
+  "clang-tidy-${version}"
+  "clang-tools-${version}"
   "lld-${version}"
+  "lldb-${version}"
+  "llvm-${version}-linker-tools"
+  "llvm-${version}-runtime"
+  "llvm-${version}-tools"
+  "llvm-${version}"
 )
 
 for pkg in "${pkgs[@]}"; do
