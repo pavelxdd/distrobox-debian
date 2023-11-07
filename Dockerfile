@@ -71,19 +71,26 @@ RUN --mount=type=bind,target=/app \
         bc \
         bind9-dnsutils \
         bison \
+        btop \
         build-essential \
         clang-${LLVM_VERSION} \
         clang-tidy-${LLVM_VERSION} \
         clang-format-${LLVM_VERSION} \
         cmake \
         deborphan \
+        debhelper \
+        debootstrap \
+        devscripts \
+        dh-cmake \
         dialog \
         diffutils \
+        erofs-utils \
         file \
         findutils \
         flex \
         htop \
         gawk \
+        gcovr \
         gcc-${GCC_VERSION} \
         g++-${GCC_VERSION} \
         gcc-${GCC_VERSION}-arm-linux-gnueabihf \
@@ -102,7 +109,7 @@ RUN --mount=type=bind,target=/app \
         jq \
         kmod \
         less \
-        libcunit1-dev \
+        libclang-rt-${LLVM_VERSION}-dev \
         libdistro-info-perl \
         libegl1-mesa \
         libgl1-mesa-glx \
@@ -126,6 +133,7 @@ RUN --mount=type=bind,target=/app \
         lsof \
         lua5.4 \
         luajit \
+        magic-wormhole \
         makepkg \
         man-db \
         manpages \
@@ -139,7 +147,7 @@ RUN --mount=type=bind,target=/app \
         nano \
         nasm \
         ncurses-base \
-        neofetch \
+        neovim \
         netcat-openbsd \
         ninja-build \
         nodejs \
@@ -164,6 +172,8 @@ RUN --mount=type=bind,target=/app \
         rsync \
         shellcheck \
         shfmt \
+        socat \
+        speedtest-cli \
         squashfs-tools \
         sshpass \
         strace \
@@ -175,9 +185,12 @@ RUN --mount=type=bind,target=/app \
         tree \
         tzdata \
         util-linux \
+        uuid-dev \
         uuid-runtime \
         valgrind \
         wget \
+        yamllint \
+        zlib1g-dev \
         zsh \
         zsh-autosuggestions \
         zsh-syntax-highlighting \
@@ -229,6 +242,8 @@ RUN --mount=type=bind,target=/app \
     && pacman-key --init \
     && pacman-key --populate archlinux \
     && pacman -Syyuudd --noconfirm \
+        fastfetch \
+        helix \
         luacheck \
         lua-lanes \
         lua-argparse \
@@ -245,7 +260,6 @@ RUN --mount=type=tmpfs,target=/tmp \
         -G Ninja \
         -S how-to-use-pvs-studio-free \
         -B how-to-use-pvs-studio-free/build \
-        -D CMAKE_CXX_COMPILER=clang++ \
         -D CMAKE_BUILD_TYPE=Release \
         -D PVS_STUDIO_SHARED=OFF \
     && cmake --build how-to-use-pvs-studio-free/build \

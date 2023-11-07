@@ -1,10 +1,15 @@
 # distrobox-debian
 
-## build docker image
+## build image
 
 ````bash
-echo "MAKEFLAGS=-j$(nproc --all)" > .env
 docker compose build --pull distrobox-debian
+````
+
+or
+
+````bash
+podman-compose build --pull distrobox-debian
 ````
 
 ## run in distrobox
