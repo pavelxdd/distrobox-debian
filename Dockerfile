@@ -141,8 +141,6 @@ RUN --mount=type=bind,target=/app \
         mesa-vulkan-drivers \
         meson \
         mkcert \
-        musl-dev \
-        musl-tools \
         nala \
         nano \
         nasm \
@@ -248,6 +246,7 @@ RUN --mount=type=bind,target=/app \
         lua-lanes \
         lua-argparse \
         lua-filesystem \
+        musl \
         starship \
     \
     && pacman -Scc --noconfirm
