@@ -2,7 +2,6 @@
 !apt.conf
 !dpkg.cfg
 !mirrorlist
-!pacman.conf
 !sources.list
 !update-alternatives-gcc.sh
 !update-alternatives-clang.sh

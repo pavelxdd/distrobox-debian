@@ -29,9 +29,6 @@ RUN --mount=type=bind,target=/app \
     && apt-get update && apt-get install -yqq --no-install-recommends \
         ca-certificates gpg curl \
     \
-    && dpkg --add-architecture armhf \
-    && dpkg --add-architecture arm64 \
-    \
     && curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key \
         | gpg --no-tty --dearmor -o /etc/apt/trusted.gpg.d/llvm.gpg \
     && printf "deb [arch=amd64] %s %s\n" \
@@ -60,7 +57,6 @@ RUN --mount=type=bind,target=/app \
     && apt-get full-upgrade -yqq --auto-remove --purge \
     && apt-get install -yqq --no-install-recommends \
         apt-utils \
-        archlinux-keyring \
         astyle \
         autoconf \
         autoconf-archive \
@@ -71,7 +67,6 @@ RUN --mount=type=bind,target=/app \
         bc \
         bind9-dnsutils \
         bison \
-        btop \
         build-essential \
         clang-${LLVM_VERSION} \
         clang-tidy-${LLVM_VERSION} \
@@ -84,7 +79,6 @@ RUN --mount=type=bind,target=/app \
         dh-cmake \
         dialog \
         diffutils \
-        erofs-utils \
         file \
         findutils \
         flex \
@@ -93,10 +87,6 @@ RUN --mount=type=bind,target=/app \
         gcovr \
         gcc-${GCC_VERSION} \
         g++-${GCC_VERSION} \
-        gcc-${GCC_VERSION}-arm-linux-gnueabihf \
-        g++-${GCC_VERSION}-arm-linux-gnueabihf \
-        gcc-${GCC_VERSION}-aarch64-linux-gnu \
-        g++-${GCC_VERSION}-aarch64-linux-gnu \
         gdb-multiarch \
         gdbserver \
         gettext \
@@ -113,14 +103,7 @@ RUN --mount=type=bind,target=/app \
         libdistro-info-perl \
         libegl1-mesa \
         libgl1-mesa-glx \
-        libev-dev \
-        liblua5.4-dev \
-        libluajit-5.1-dev \
         libnss-myhostname \
-        libpython3-dev \
-        libssl-dev:amd64 \
-        libssl-dev:armhf \
-        libssl-dev:arm64 \
         libtool-bin \
         libvte-2.9[0-9]-common \
         libvte-common \
@@ -134,31 +117,25 @@ RUN --mount=type=bind,target=/app \
         lua5.4 \
         luajit \
         magic-wormhole \
-        makepkg \
         man-db \
         manpages \
         mc \
         mesa-vulkan-drivers \
         meson \
         mkcert \
-        nala \
+        musl \
         nano \
-        nasm \
         ncurses-base \
-        neovim \
         netcat-openbsd \
         ninja-build \
         nodejs \
         openssh-client \
-        pacman-package-manager \
         p7zip-rar \
         p7zip-full \
         pahole \
         passwd \
-        pbzip2 \
         pinentry-curses \
         perl \
-        pigz \
         pkg-config \
         pre-commit \
         procps \
@@ -183,12 +160,10 @@ RUN --mount=type=bind,target=/app \
         tree \
         tzdata \
         util-linux \
-        uuid-dev \
         uuid-runtime \
         valgrind \
         wget \
         yamllint \
-        zlib1g-dev \
         zsh \
         zsh-autosuggestions \
         zsh-syntax-highlighting \
@@ -229,32 +204,9 @@ RUN --mount=type=bind,target=/app \
     && apt-get clean -yqq \
     && rm -rf /var/lib/apt/lists/*
 
-RUN --mount=type=bind,target=/app \
-    --mount=type=tmpfs,target=/tmp \
-    \
-    pacman --version \
-    \
-    && install -m644 /app/pacman.conf /etc/pacman.conf \
-    && install -Dm644 /app/mirrorlist /etc/pacman.d/mirrorlist \
-    \
-    && pacman-key --init \
-    && pacman-key --populate archlinux \
-    && pacman -Syyuudd --noconfirm \
-        fastfetch \
-        helix \
-        luacheck \
-        lua-lanes \
-        lua-argparse \
-        lua-filesystem \
-        musl \
-        starship \
-    \
-    && pacman -Scc --noconfirm
-
 # how-to-use-pvs-studio-free
 RUN --mount=type=tmpfs,target=/tmp \
-    git clone --depth 1 --single-branch https://github.com/viva64/how-to-use-pvs-studio-free.git \
-    && sed -i '1s;^;#include <cstdint>\n;' how-to-use-pvs-studio-free/comments.h \
+    git clone --depth 1 --single-branch https://github.com/pavelxdd/how-to-use-pvs-studio-free.git \
     && cmake -Wno-dev \
         -G Ninja \
         -S how-to-use-pvs-studio-free \
@@ -274,6 +226,21 @@ ADD --chmod=755 --chown=root:root \
 ADD --chmod=755 --chown=root:root \
     https://github.com/1player/host-spawn/releases/latest/download/host-spawn-x86_64 \
     /usr/local/bin/host-spawn
+
+# websocat
+ADD --chmod=755 --chown=root:root \
+    https://github.com/vi/websocat/releases/latest/download/websocat_max.x86_64-unknown-linux-musl \
+    /usr/local/bin/websocat
+
+# starship
+RUN --mount=type=tmpfs,target=/tmp \
+    curl -fsSL https://github.com/starship/starship/releases/latest/download/starship-x86_64-unknown-linux-gnu.tar.gz \
+    | tar xz && install -Dm755 -t /usr/local/bin starship
+
+# fastfetch
+RUN --mount=type=tmpfs,target=/tmp version=2.6.0 \
+    && curl -fsSLO https://github.com/fastfetch-cli/fastfetch/releases/download/${version}/fastfetch-${version}-Linux.deb \
+    && apt-get install -yqq --no-install-recommends ./fastfetch-${version}-Linux.deb
 
 # locales
 ENV LANG en_US.UTF-8
