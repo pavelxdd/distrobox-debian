@@ -14,19 +14,6 @@ repos:
     language: system
     types: [shell]
 
-  - id: hadolint
-    name: hadolint
-    entry: hadolint
-    language: system
-    types: [dockerfile]
-
-  - id: yamllint
-    name: yamllint
-    entry: yamllint
-    args: ['-d=relaxed']
-    language: system
-    types: [yaml]
-
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v4.5.0
   hooks:

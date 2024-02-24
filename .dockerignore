@@ -1,7 +1,0 @@
-*
-!apt.conf
-!dpkg.cfg
-!mirrorlist
-!sources.list
-!update-alternatives-gcc.sh
-!update-alternatives-clang.sh

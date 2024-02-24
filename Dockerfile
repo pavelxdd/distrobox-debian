@@ -11,8 +11,8 @@ ARG APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1
 ENV NPM_CONFIG_AUDIT=false
 ENV NPM_CONFIG_FUND=false
 
-ARG GCC_VERSION=13
-ARG LLVM_VERSION=17
+ARG GCC_VERSION=14
+ARG LLVM_VERSION=18
 ARG NODE_VERSION=20
 
 RUN --mount=type=bind,target=/app \
@@ -123,6 +123,7 @@ RUN --mount=type=bind,target=/app \
         mesa-vulkan-drivers \
         meson \
         mkcert \
+        mold \
         musl \
         nano \
         ncurses-base \
@@ -236,11 +237,6 @@ ADD --chmod=755 --chown=root:root \
 RUN --mount=type=tmpfs,target=/tmp \
     curl -fsSL https://github.com/starship/starship/releases/latest/download/starship-x86_64-unknown-linux-gnu.tar.gz \
     | tar xz && install -Dm755 -t /usr/local/bin starship
-
-# fastfetch
-RUN --mount=type=tmpfs,target=/tmp version=2.6.0 \
-    && curl -fsSLO https://github.com/fastfetch-cli/fastfetch/releases/download/${version}/fastfetch-${version}-Linux.deb \
-    && apt-get install -yqq --no-install-recommends ./fastfetch-${version}-Linux.deb
 
 # locales
 ENV LANG en_US.UTF-8

@@ -1,6 +1,0 @@
-#deb http://mirror.ps.kz/debian sid main contrib non-free non-free-firmware
-#deb http://mirror.hoster.kz/debian sid main contrib non-free non-free-firmware
-#deb http://mirror.neolabs.kz/debian sid main contrib non-free non-free-firmware
-deb http://mirror.yandex.ru/debian sid main contrib non-free non-free-firmware
-deb http://mirrors.kernel.org/debian sid main contrib non-free non-free-firmware
-deb http://deb.debian.org/debian sid main contrib non-free non-free-firmware
